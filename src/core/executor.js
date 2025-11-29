@@ -34,11 +34,13 @@ export class TaskExecutor {
       const { EmailModule } = await import('../modules/email.js').catch(() => ({ EmailModule: null }));
       const { FileModule } = await import('../modules/files.js').catch(() => ({ FileModule: null }));
       const { WebModule } = await import('../modules/web.js').catch(() => ({ WebModule: null }));
+      const { FantasyFootballModule } = await import('../modules/fantasy-football.js').catch(() => ({ FantasyFootballModule: null }));
 
       // Register modules
       if (EmailModule) this.taskModules.set('email', new EmailModule(this.agent));
       if (FileModule) this.taskModules.set('file', new FileModule(this.agent));
       if (WebModule) this.taskModules.set('web', new WebModule(this.agent));
+      if (FantasyFootballModule) this.taskModules.set('fantasy-football', new FantasyFootballModule(this.agent));
 
       logger.info(`Loaded ${this.taskModules.size} task modules`);
     } catch (error) {
@@ -86,6 +88,11 @@ export class TaskExecutor {
    */
   _determineTaskType(task) {
     const description = task.description.toLowerCase();
+
+    // Fantasy football-related keywords
+    if (description.match(/fantasy|football|lineup|player|start|sit|trade|waiver|matchup|injury|scenario|ros|ranking/i)) {
+      return 'fantasy-football';
+    }
 
     // Email-related keywords
     if (description.match(/email|mail|send message|compose/i)) {
