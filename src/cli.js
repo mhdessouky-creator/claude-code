@@ -249,6 +249,154 @@ program
     }
   });
 
+/**
+ * Add MCP server
+ */
+program
+  .command('mcp:add <name> <url>')
+  .description('Add an MCP server')
+  .option('-t, --token <token>', 'Authorization token')
+  .action(async (name, url, options) => {
+    const agent = new AIAgent();
+    const spinner = ora('Adding MCP server...').start();
+
+    try {
+      await agent.initialize();
+
+      const serverConfig = {
+        name,
+        url,
+        type: 'url',
+        ...(options.token && { authorization_token: options.token }),
+      };
+
+      const result = await agent.addMCPServer(serverConfig);
+
+      if (result.success) {
+        spinner.succeed(chalk.green('MCP server added!'));
+        console.log(chalk.white('Name:'), name);
+        console.log(chalk.white('URL:'), url);
+      } else {
+        spinner.fail(chalk.red('Failed to add MCP server'));
+        console.error(chalk.red(result.error));
+      }
+
+      await agent.shutdown();
+    } catch (error) {
+      spinner.fail(chalk.red('Error adding MCP server'));
+      console.error(chalk.red(error.message));
+      process.exit(1);
+    }
+  });
+
+/**
+ * Remove MCP server
+ */
+program
+  .command('mcp:remove <name>')
+  .description('Remove an MCP server')
+  .action(async (name) => {
+    const agent = new AIAgent();
+    const spinner = ora('Removing MCP server...').start();
+
+    try {
+      await agent.initialize();
+
+      const result = await agent.removeMCPServer(name);
+
+      if (result.success) {
+        spinner.succeed(chalk.green('MCP server removed!'));
+      } else {
+        spinner.fail(chalk.red('Failed to remove MCP server'));
+        console.error(chalk.red(result.error));
+      }
+
+      await agent.shutdown();
+    } catch (error) {
+      spinner.fail(chalk.red('Error removing MCP server'));
+      console.error(chalk.red(error.message));
+      process.exit(1);
+    }
+  });
+
+/**
+ * List MCP servers
+ */
+program
+  .command('mcp:list')
+  .description('List all MCP servers')
+  .action(async () => {
+    const agent = new AIAgent();
+    const spinner = ora('Loading MCP servers...').start();
+
+    try {
+      await agent.initialize();
+      const status = agent.getStatus();
+
+      spinner.stop();
+
+      if (!status.mcpServers || status.mcpServers.total === 0) {
+        console.log(chalk.yellow('\nNo MCP servers configured\n'));
+        console.log(chalk.gray('Add a server with: npm run cli mcp:add <name> <url>\n'));
+        await agent.shutdown();
+        return;
+      }
+
+      console.log(chalk.cyan.bold('\n🔌 MCP Servers\n'));
+      console.log(chalk.white('Total:'), status.mcpServers.total);
+      console.log(chalk.white('Enabled:'), chalk.green(status.mcpServers.enabled));
+      console.log(chalk.white('Disabled:'), chalk.gray(status.mcpServers.disabled));
+
+      console.log(chalk.cyan('\nServers:'));
+      status.mcpServers.servers.forEach(server => {
+        const icon = server.enabled ? chalk.green('✓') : chalk.gray('✗');
+        console.log(`  ${icon} ${chalk.white(server.name)}`);
+        console.log(chalk.gray(`    ${server.url}`));
+        console.log(chalk.gray(`    Type: ${server.type}`));
+      });
+
+      console.log();
+      await agent.shutdown();
+    } catch (error) {
+      spinner.fail(chalk.red('Error loading MCP servers'));
+      console.error(chalk.red(error.message));
+      process.exit(1);
+    }
+  });
+
+/**
+ * Discover MCP tools
+ */
+program
+  .command('mcp:discover')
+  .description('Discover available tools from MCP servers')
+  .action(async () => {
+    const agent = new AIAgent();
+    const spinner = ora('Discovering MCP tools...').start();
+
+    try {
+      await agent.initialize();
+
+      const result = await agent.discoverMCPTools();
+
+      if (result.success) {
+        spinner.succeed(chalk.green('Tools discovered!'));
+        console.log(chalk.white('\nResponse:'));
+        console.log(result.response);
+        console.log();
+      } else {
+        spinner.fail(chalk.red('Failed to discover tools'));
+        console.error(chalk.red(result.message || result.error));
+      }
+
+      await agent.shutdown();
+    } catch (error) {
+      spinner.fail(chalk.red('Error discovering tools'));
+      console.error(chalk.red(error.message));
+      process.exit(1);
+    }
+  });
+
 // Parse commands
 program.parse(process.argv);
 

@@ -126,6 +126,8 @@ digital-life-ai-agent/
 
 ## 🔧 الأوامر المتاحة
 
+### الأوامر الأساسية
+
 | الأمر | الوصف | مثال |
 |-------|-------|------|
 | `chat` | بدء محادثة تفاعلية | `npm run cli chat` |
@@ -133,6 +135,17 @@ digital-life-ai-agent/
 | `schedule` | جدولة مهمة متكررة | `npm run cli schedule "تنظيف" "0 9 * * *"` |
 | `status` | عرض حالة الوكيل | `npm run cli status` |
 | `clear` | مسح السجلات | `npm run cli clear` |
+
+### أوامر MCP (Model Context Protocol)
+
+| الأمر | الوصف | مثال |
+|-------|-------|------|
+| `mcp:add` | إضافة MCP server | `npm run cli mcp:add name url` |
+| `mcp:remove` | حذف MCP server | `npm run cli mcp:remove name` |
+| `mcp:list` | عرض الخوادم | `npm run cli mcp:list` |
+| `mcp:discover` | اكتشاف الأدوات | `npm run cli mcp:discover` |
+
+📖 [دليل MCP الكامل](./docs/MCP_GUIDE.md)
 
 ## 🔐 الأمان والخصوصية
 
@@ -149,6 +162,7 @@ digital-life-ai-agent/
 - [x] وحدات المهام الأساسية
 - [x] واجهة CLI تفاعلية
 - [x] جدولة المهام
+- [x] 🆕 دعم MCP (Model Context Protocol)
 - [ ] واجهة ويب
 - [ ] تكامل مع Google Calendar
 - [ ] دعم الأوامر الصوتية
@@ -158,6 +172,7 @@ digital-life-ai-agent/
 ## 📚 التوثيق الإضافي
 
 - 📖 [دليل المستخدم الشامل](./AGENT_GUIDE.md)
+- 🔌 [دليل MCP Integration](./docs/MCP_GUIDE.md)
 - 🔧 [أمثلة متقدمة](./examples/)
 - 🎯 [دليل التطوير](./guides/)
 
