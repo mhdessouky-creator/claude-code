@@ -1,0 +1,48 @@
+{
+  "name": "digital-life-ai-agent",
+  "version": "1.0.0",
+  "description": "AI Agent for automating digital life tasks using Claude",
+  "main": "src/index.js",
+  "type": "module",
+  "bin": {
+    "ai-agent": "./src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "cli": "node src/cli.js",
+    "test": "node --test tests/**/*.test.js",
+    "lint": "eslint src/**/*.js",
+    "build": "node scripts/build.js"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "automation",
+    "claude",
+    "anthropic",
+    "digital-assistant"
+  ],
+  "author": "mhdessouky-creator",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.0",
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.1",
+    "chalk": "^5.3.0",
+    "ora": "^7.0.1",
+    "inquirer": "^9.2.12",
+    "node-cron": "^3.0.3",
+    "sqlite3": "^5.1.6",
+    "nodemailer": "^6.9.7",
+    "axios": "^1.6.2",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
