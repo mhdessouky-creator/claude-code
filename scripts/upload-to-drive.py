@@ -2,22 +2,55 @@
 """
 Upload Prompt Library to Google Drive
 رفع مكتبة Prompts إلى Google Drive
+
+IMPORTANT: This script requires Google Workspace MCP Server to be running!
+Start it first: node mcp-servers/google-workspace/server.js
 """
 
 import sys
 import os
+import socket
 
 # Add parent directory to path to import anthropic_skills
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from python.anthropic_skills import AnthropicSkills
+def check_mcp_server(host='localhost', port=3001, timeout=2):
+    """تحقق من أن MCP Server شغال"""
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        result = sock.connect_ex((host, port))
+        sock.close()
+        return result == 0
+    except:
+        return False
 
 def upload_to_drive():
     """رفع مكتبة Prompts إلى Google Drive"""
 
     print("🚀 بدء رفع Prompt Library إلى Google Drive...")
 
+    # التحقق من MCP Server
+    print("\n🔍 التحقق من Google Workspace MCP Server...")
+    if not check_mcp_server('localhost', 3001):
+        print("\n❌ خطأ: Google Workspace MCP Server غير شغال!")
+        print("\n💡 الحل:")
+        print("   1. افتح terminal جديد")
+        print("   2. شغّل: node mcp-servers/google-workspace/server.js")
+        print("   3. انتظر حتى ترى: '🚀 Google Workspace MCP Server running on port 3001'")
+        print("   4. ارجع هنا وشغّل السكريبت مرة تانية\n")
+        return False
+
+    print("✅ MCP Server شغال!\n")
+
     # تهيئة Claude مع Google Workspace skill
+    try:
+        from python.anthropic_skills import AnthropicSkills
+    except ImportError:
+        print("❌ خطأ: لم يتم العثور على anthropic_skills")
+        print("💡 تأكد من تثبيت المتطلبات: pip install -r python/requirements.txt")
+        return False
+
     claude = AnthropicSkills()
     claude.add_skill({
         'name': 'google-workspace',
@@ -179,19 +212,19 @@ if __name__ == '__main__':
     print("📚 Prompt Library → Google Drive Uploader")
     print("=" * 60)
 
-    # تحقق من تشغيل MCP server
-    print("\n⚠️  تأكد من تشغيل Google Workspace MCP Server على المنفذ 3001")
-    print("   يمكنك تشغيله بـ: node mcp-servers/google-workspace/server.js")
-
-    input("\nاضغط Enter للمتابعة أو Ctrl+C للإلغاء...")
-
     try:
-        upload_to_drive()
+        result = upload_to_drive()
+        if result is False:
+            sys.exit(1)
     except KeyboardInterrupt:
         print("\n\n❌ تم الإلغاء بواسطة المستخدم")
+        sys.exit(0)
     except Exception as e:
         print(f"\n\n❌ حدث خطأ: {e}")
         print("\nتأكد من:")
         print("1. تشغيل Google Workspace MCP Server")
         print("2. إعداد Google API credentials في .env")
         print("3. منح الصلاحيات المناسبة للـ API")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
