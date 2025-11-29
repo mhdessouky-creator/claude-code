@@ -1,31 +1,73 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+# AI Agent - Continuous Integration Workflow
+# Builds and tests the Digital Life AI Agent
 
-name: Node.js CI
+name: AI Agent CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "claude/**" ]
   pull_request:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  build-and-test:
+    name: Build and Test on Node ${{ matrix.node-version }}
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Create .env file for testing
+      run: |
+        echo "ANTHROPIC_API_KEY=test_key" > .env
+        echo "AGENT_NAME=TestAgent" >> .env
+        echo "AGENT_MODEL=claude-3-5-sonnet-20241022" >> .env
+        echo "DB_PATH=./data/test-memory.db" >> .env
+
+    - name: Run build script
+      run: npm run build
+
+    - name: Run tests
+      run: npm test
+
+    - name: Check code structure
+      run: |
+        echo "Checking project structure..."
+        ls -la src/
+        ls -la src/core/
+        ls -la src/modules/
+
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linter
+      run: npm run lint --if-present
+      continue-on-error: true
