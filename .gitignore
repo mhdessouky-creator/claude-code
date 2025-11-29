@@ -59,6 +59,11 @@ temp/
 *.bak
 *.cache
 
+# Database files
+data/
+*.db
+*.sqlite
+
 # Documentation builds
 docs/_build/
 site/
