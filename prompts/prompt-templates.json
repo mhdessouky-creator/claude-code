@@ -1,0 +1,701 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "model": "claude-sonnet-4-5",
+    "default_token_limit": 4096,
+    "language": "ar-en",
+    "total_templates": 28
+  },
+  "templates": [
+    {
+      "id": "gw_create_calendar_event",
+      "integration": "google-workspace",
+      "intent": "إنشاء حدث في Google Calendar",
+      "system_message": "أنت مساعد متخصص في إدارة المواعيد. قم بإنشاء أحداث تقويمية واضحة ومنظمة.",
+      "user_message": "أنشئ حدث في تقويمي:\nالعنوان: {{title}}\nالتاريخ: {{date}}\nالوقت: {{time}}\nالمدة: {{duration}}\nالحضور: {{attendees}}\nالوصف: {{description}}",
+      "assistant_instructions": "استخدم Google Calendar API لإنشاء الحدث. تأكد من صيغة التاريخ ISO 8601. أرسل دعوات للحضور إن وُجدوا.",
+      "example_input": {
+        "title": "اجتماع فريق المنتج",
+        "date": "2025-12-01",
+        "time": "14:00",
+        "duration": "60min",
+        "attendees": "team@company.com, manager@company.com",
+        "description": "مراجعة خطة Q1"
+      },
+      "example_output": {
+        "success": true,
+        "event_id": "abc123xyz",
+        "calendar_link": "https://calendar.google.com/event?eid=abc123xyz",
+        "attendees_notified": true
+      },
+      "token_estimate": 250,
+      "python_wrapper": "from anthropic_skills import AnthropicSkills\n\nclaude = AnthropicSkills()\nclaude.add_skill({'name': 'google-workspace', 'type': 'url', 'url': 'http://localhost:3001'})\n\nresponse = claude.chat(\n    prompt=f\"أنشئ حدث في تقويمي:\\nالعنوان: {title}\\nالتاريخ: {date}\\nالوقت: {time}\\nالمدة: {duration}\\nالحضور: {attendees}\\nالوصف: {description}\",\n    system=\"أنت مساعد متخصص في إدارة المواعيد. قم بإنشاء أحداث تقويمية واضحة ومنظمة.\"\n)",
+      "node_wrapper": "const agent = new AIAgent();\nawait agent.addMCPServer({name: 'google-workspace', url: 'http://localhost:3001', type: 'url'});\n\nconst response = await agent.processMessage(\n  `أنشئ حدث في تقويمي:\\nالعنوان: ${title}\\nالتاريخ: ${date}\\nالوقت: ${time}\\nالمدة: ${duration}\\nالحضور: ${attendees}\\nالوصف: ${description}`\n);",
+      "token_saving_tips": [
+        "استخدم اختصارات للأوقات (60min بدلاً من hour)",
+        "أرسل قائمة الحضور كـ CSV بدلاً من JSON",
+        "تجنب الوصف الطويل؛ اربطه بمستند خارجي"
+      ],
+      "notes": "تأكد من صلاحيات Calendar API"
+    },
+    {
+      "id": "gw_send_email_draft",
+      "integration": "google-workspace",
+      "intent": "إرسال بريد إلكتروني عبر Gmail",
+      "system_message": "أنت مساعد بريد احترافي. صِغ رسائل واضحة ومهنية.",
+      "user_message": "أرسل بريد إلى {{to}}\nالموضوع: {{subject}}\nالرسالة: {{body}}\nنسخة: {{cc}}",
+      "assistant_instructions": "استخدم Gmail API لإرسال البريد. تحقق من صحة عناوين البريد قبل الإرسال.",
+      "example_input": {
+        "to": "client@example.com",
+        "subject": "متابعة الاجتماع",
+        "body": "شكراً للاجتماع اليوم. إليك الملاحظات...",
+        "cc": "manager@company.com"
+      },
+      "example_output": {
+        "success": true,
+        "message_id": "msg_xyz789",
+        "thread_id": "thread_123"
+      },
+      "token_estimate": 200,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"أرسل بريد إلى {to}\\nالموضوع: {subject}\\nالرسالة: {body}\\nنسخة: {cc}\",\n    system=\"أنت مساعد بريد احترافي. صِغ رسائل واضحة ومهنية.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `أرسل بريد إلى ${to}\\nالموضوع: ${subject}\\nالرسالة: ${body}\\nنسخة: ${cc}`\n);",
+      "token_saving_tips": [
+        "للرسائل الطويلة، أرسل رابط مستند بدلاً من نص كامل",
+        "استخدم templates جاهزة للرسائل المتكررة"
+      ],
+      "notes": "لا تُرسل معلومات حساسة في نص البريد مباشرة"
+    },
+    {
+      "id": "gw_summarize_drive_doc",
+      "integration": "google-workspace",
+      "intent": "تلخيص مستند من Google Drive",
+      "system_message": "أنت محلل مستندات خبير. قدّم ملخصات دقيقة ومختصرة.",
+      "user_message": "لخّص المستند: {{doc_id}}\nالتركيز على: {{focus_areas}}",
+      "assistant_instructions": "اقرأ المستند من Drive، استخرج النقاط الرئيسية، ولخّصها في 3-5 نقاط.",
+      "example_input": {
+        "doc_id": "1ABC2DEF3GHI",
+        "focus_areas": "القرارات، الأرقام المالية، الخطوات التالية"
+      },
+      "example_output": {
+        "summary": "قرارات: الموافقة على ميزانية Q1. أرقام: نمو 15%. الخطوات: توظيف 3 مطورين.",
+        "key_points": ["موافقة الميزانية", "نمو 15%", "توظيف فريق"]
+      },
+      "token_estimate": 800,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"لخّص المستند: {doc_id}\\nالتركيز على: {focus_areas}\",\n    system=\"أنت محلل مستندات خبير. قدّم ملخصات دقيقة ومختصرة.\",\n    max_tokens=1000\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `لخّص المستند: ${doc_id}\\nالتركيز على: ${focus_areas}`\n);",
+      "token_saving_tips": [
+        "حدد عدد النقاط المطلوبة (مثلاً 5 نقاط فقط)",
+        "استخدم extractive summary بدلاً من abstractive",
+        "اطلب ملخص بطول محدد (100 كلمة مثلاً)"
+      ],
+      "notes": "للمستندات الكبيرة جداً، استخدم chunking"
+    },
+    {
+      "id": "gw_search_emails",
+      "integration": "google-workspace",
+      "intent": "البحث في Gmail وتصنيف النتائج",
+      "system_message": "أنت مساعد بريد ذكي. ابحث وصنّف الرسائل حسب الأهمية.",
+      "user_message": "ابحث في بريدي عن: {{query}}\nآخر {{days}} يوم\nصنّفها حسب: {{criteria}}",
+      "assistant_instructions": "ابحث باستخدام Gmail search query، صنّف النتائج (عالي/متوسط/منخفض)، واعرض ملخص.",
+      "example_input": {
+        "query": "مشروع X",
+        "days": 7,
+        "criteria": "الأولوية والموعد النهائي"
+      },
+      "example_output": {
+        "total_found": 12,
+        "high_priority": 3,
+        "medium_priority": 6,
+        "low_priority": 3,
+        "summary": "3 رسائل عاجلة تحتاج رد اليوم"
+      },
+      "token_estimate": 300,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"ابحث في بريدي عن: {query}\\nآخر {days} يوم\\nصنّفها حسب: {criteria}\",\n    system=\"أنت مساعد بريد ذكي. ابحث وصنّف الرسائل حسب الأهمية.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `ابحث في بريدي عن: ${query}\\nآخر ${days} يوم\\nصنّفها حسب: ${criteria}`\n);",
+      "token_saving_tips": [
+        "حدد عدد النتائج (مثلاً top 10)",
+        "اطلب ملخص فقط بدلاً من النصوص الكاملة"
+      ],
+      "notes": "استخدم Gmail search operators لدقة أفضل"
+    },
+    {
+      "id": "notion_create_page",
+      "integration": "notion",
+      "intent": "إنشاء صفحة جديدة في Notion",
+      "system_message": "أنت مساعد Notion محترف. أنشئ صفحات منظمة وواضحة.",
+      "user_message": "أنشئ صفحة في {{database}}\nالعنوان: {{title}}\nالحالة: {{status}}\nالأولوية: {{priority}}\nالمحتوى: {{content}}",
+      "assistant_instructions": "استخدم Notion API لإنشاء صفحة مع properties محددة. استخدم Markdown للمحتوى.",
+      "example_input": {
+        "database": "المشاريع",
+        "title": "تطبيق الموبايل",
+        "status": "قيد التنفيذ",
+        "priority": "عالية",
+        "content": "## الأهداف\\n- تطوير UI\\n- دمج API"
+      },
+      "example_output": {
+        "success": true,
+        "page_id": "abc-123-def-456",
+        "url": "https://notion.so/abc-123-def-456"
+      },
+      "token_estimate": 220,
+      "python_wrapper": "claude.add_skill({'name': 'notion', 'type': 'url', 'url': 'http://localhost:3002'})\nresponse = claude.chat(\n    prompt=f\"أنشئ صفحة في {database}\\nالعنوان: {title}\\nالحالة: {status}\\nالأولوية: {priority}\\nالمحتوى: {content}\",\n    system=\"أنت مساعد Notion محترف. أنشئ صفحات منظمة وواضحة.\"\n)",
+      "node_wrapper": "await agent.addMCPServer({name: 'notion', url: 'http://localhost:3002', type: 'url'});\nconst response = await agent.processMessage(\n  `أنشئ صفحة في ${database}\\nالعنوان: ${title}\\nالحالة: ${status}\\nالأولوية: ${priority}\\nالمحتوى: ${content}`\n);",
+      "token_saving_tips": [
+        "استخدم Markdown بدلاً من rich text",
+        "للمحتوى الطويل، أرسل رابط أو ملف"
+      ],
+      "notes": "تأكد من أن properties متطابقة مع database schema"
+    },
+    {
+      "id": "notion_update_property",
+      "integration": "notion",
+      "intent": "تحديث خاصية في صفحة Notion",
+      "system_message": "أنت مساعد تحديث بيانات. عدّل properties بدقة.",
+      "user_message": "حدّث الصفحة {{page_id}}\nغيّر {{property}} إلى {{value}}",
+      "assistant_instructions": "استخدم Notion update page API. تأكد من نوع البيانات الصحيح للـ property.",
+      "example_input": {
+        "page_id": "abc-123",
+        "property": "Status",
+        "value": "مكتمل"
+      },
+      "example_output": {
+        "success": true,
+        "updated_property": "Status",
+        "new_value": "مكتمل"
+      },
+      "token_estimate": 150,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"حدّث الصفحة {page_id}\\nغيّر {property} إلى {value}\",\n    system=\"أنت مساعد تحديث بيانات. عدّل properties بدقة.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `حدّث الصفحة ${page_id}\\nغيّر ${property} إلى ${value}`\n);",
+      "token_saving_tips": [
+        "أرسل فقط الـ property المراد تحديثه",
+        "استخدم property names مختصرة"
+      ],
+      "notes": "تحقق من permissions قبل التحديث"
+    },
+    {
+      "id": "notion_query_database",
+      "integration": "notion",
+      "intent": "استعلام قاعدة بيانات Notion",
+      "system_message": "أنت محلل بيانات Notion. استخرج المعلومات بدقة.",
+      "user_message": "ابحث في database {{db_id}}\nالشرط: {{filter}}\nالترتيب: {{sort}}\nالحد: {{limit}}",
+      "assistant_instructions": "استخدم Notion query database API مع filters و sorts. أرجع نتائج منسقة.",
+      "example_input": {
+        "db_id": "tasks-db",
+        "filter": "Status = قيد التنفيذ AND Priority = عالية",
+        "sort": "Due Date تصاعدي",
+        "limit": 10
+      },
+      "example_output": {
+        "total": 7,
+        "results": [
+          {"title": "مهمة 1", "status": "قيد التنفيذ", "priority": "عالية", "due": "2025-12-01"},
+          {"title": "مهمة 2", "status": "قيد التنفيذ", "priority": "عالية", "due": "2025-12-03"}
+        ]
+      },
+      "token_estimate": 400,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"ابحث في database {db_id}\\nالشرط: {filter}\\nالترتيب: {sort}\\nالحد: {limit}\",\n    system=\"أنت محلل بيانات Notion. استخرج المعلومات بدقة.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `ابحث في database ${db_id}\\nالشرط: ${filter}\\nالترتيب: ${sort}\\nالحد: ${limit}`\n);",
+      "token_saving_tips": [
+        "حدد limit صغير (10-20 نتيجة)",
+        "اطلب فقط الـ properties المطلوبة",
+        "استخدم pagination للنتائج الكبيرة"
+      ],
+      "notes": "Notion API لها حدود rate limiting"
+    },
+    {
+      "id": "airtable_search_records",
+      "integration": "airtable",
+      "intent": "البحث عن سجلات في Airtable",
+      "system_message": "أنت خبير Airtable. ابحث واستخرج البيانات بكفاءة.",
+      "user_message": "ابحث في جدول {{table}}\nالبحث عن {{field}} = {{value}}\nالحد: {{max}}",
+      "assistant_instructions": "استخدم Airtable API للبحث. استخدم filterByFormula للدقة.",
+      "example_input": {
+        "table": "Customers",
+        "field": "Status",
+        "value": "Active",
+        "max": 20
+      },
+      "example_output": {
+        "found": 15,
+        "records": [
+          {"id": "rec123", "Name": "شركة ABC", "Status": "Active"},
+          {"id": "rec456", "Name": "شركة XYZ", "Status": "Active"}
+        ]
+      },
+      "token_estimate": 300,
+      "python_wrapper": "claude.add_skill({'name': 'airtable', 'type': 'url', 'url': 'http://localhost:3003'})\nresponse = claude.chat(\n    prompt=f\"ابحث في جدول {table}\\nالبحث عن {field} = {value}\\nالحد: {max}\",\n    system=\"أنت خبير Airtable. ابحث واستخرج البيانات بكفاءة.\"\n)",
+      "node_wrapper": "await agent.addMCPServer({name: 'airtable', url: 'http://localhost:3003', type: 'url'});\nconst response = await agent.processMessage(\n  `ابحث في جدول ${table}\\nالبحث عن ${field} = ${value}\\nالحد: ${max}`\n);",
+      "token_saving_tips": [
+        "استخدم formula دقيقة لتقليل النتائج",
+        "حدد fields محددة بدلاً من كل الأعمدة"
+      ],
+      "notes": "Airtable API key حساس - لا تشاركه"
+    },
+    {
+      "id": "airtable_update_record",
+      "integration": "airtable",
+      "intent": "تحديث سجل في Airtable",
+      "system_message": "أنت مدير بيانات Airtable. حدّث السجلات بدقة.",
+      "user_message": "حدّث السجل {{record_id}} في {{table}}\nغيّر {{fields}}",
+      "assistant_instructions": "استخدم Airtable update API. تحقق من أنواع البيانات.",
+      "example_input": {
+        "record_id": "rec123",
+        "table": "Projects",
+        "fields": {"Status": "Completed", "Progress": 100}
+      },
+      "example_output": {
+        "success": true,
+        "record_id": "rec123",
+        "updated_fields": ["Status", "Progress"]
+      },
+      "token_estimate": 180,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"حدّث السجل {record_id} في {table}\\nغيّر {fields}\",\n    system=\"أنت مدير بيانات Airtable. حدّث السجلات بدقة.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `حدّث السجل ${record_id} في ${table}\\nغيّر ${fields}`\n);",
+      "token_saving_tips": [
+        "أرسل فقط الحقول المتغيرة",
+        "استخدم batch updates للتحديثات المتعددة"
+      ],
+      "notes": "تحقق من permissions على الجدول"
+    },
+    {
+      "id": "airtable_create_record",
+      "integration": "airtable",
+      "intent": "إنشاء سجل جديد في Airtable",
+      "system_message": "أنت منشئ بيانات Airtable. أضف سجلات صحيحة ومكتملة.",
+      "user_message": "أنشئ سجل في {{table}}\nالبيانات: {{data}}",
+      "assistant_instructions": "استخدم Airtable create API. تحقق من required fields.",
+      "example_input": {
+        "table": "Leads",
+        "data": {
+          "Name": "عميل جديد",
+          "Email": "client@example.com",
+          "Source": "Website",
+          "Status": "New"
+        }
+      },
+      "example_output": {
+        "success": true,
+        "record_id": "recXYZ789",
+        "created_at": "2025-11-29T10:00:00Z"
+      },
+      "token_estimate": 200,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"أنشئ سجل في {table}\\nالبيانات: {json.dumps(data, ensure_ascii=False)}\",\n    system=\"أنت منشئ بيانات Airtable. أضف سجلات صحيحة ومكتملة.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `أنشئ سجل في ${table}\\nالبيانات: ${JSON.stringify(data)}`\n);",
+      "token_saving_tips": [
+        "استخدم defaults للحقول الاختيارية",
+        "للإدخال المتعدد استخدم batch create"
+      ],
+      "notes": "Required fields يجب أن تكون موجودة"
+    },
+    {
+      "id": "telegram_send_message",
+      "integration": "telegram",
+      "intent": "إرسال رسالة Telegram",
+      "system_message": "أنت مساعد Telegram. أرسل رسائل واضحة ومنسقة.",
+      "user_message": "أرسل رسالة إلى {{chat_id}}\nالنص: {{text}}\nالتنسيق: {{format}}",
+      "assistant_instructions": "استخدم Telegram Bot API. استخدم Markdown أو HTML للتنسيق.",
+      "example_input": {
+        "chat_id": "123456789",
+        "text": "تحديث المشروع: اكتمل 80%",
+        "format": "Markdown"
+      },
+      "example_output": {
+        "success": true,
+        "message_id": 987,
+        "chat_id": 123456789
+      },
+      "token_estimate": 150,
+      "python_wrapper": "claude.add_skill({'name': 'telegram', 'type': 'url', 'url': 'http://localhost:3004'})\nresponse = claude.chat(\n    prompt=f\"أرسل رسالة إلى {chat_id}\\nالنص: {text}\\nالتنسيق: {format}\",\n    system=\"أنت مساعد Telegram. أرسل رسائل واضحة ومنسقة.\"\n)",
+      "node_wrapper": "await agent.addMCPServer({name: 'telegram', url: 'http://localhost:3004', type: 'url'});\nconst response = await agent.processMessage(\n  `أرسل رسالة إلى ${chat_id}\\nالنص: ${text}\\nالتنسيق: ${format}`\n);",
+      "token_saving_tips": [
+        "للرسائل المتعددة استخدم broadcast",
+        "استخدم نص قصير ومباشر"
+      ],
+      "notes": "احفظ chat_id بشكل آمن"
+    },
+    {
+      "id": "telegram_send_media",
+      "integration": "telegram",
+      "intent": "إرسال وسائط عبر Telegram",
+      "system_message": "أنت مرسل وسائط Telegram. أرسل الصور والملفات بكفاءة.",
+      "user_message": "أرسل {{media_type}} إلى {{chat_id}}\nالملف: {{file_url}}\nالوصف: {{caption}}",
+      "assistant_instructions": "استخدم sendPhoto أو sendDocument حسب النوع. أضف caption مختصر.",
+      "example_input": {
+        "media_type": "photo",
+        "chat_id": "123456789",
+        "file_url": "https://example.com/image.png",
+        "caption": "تقرير الأداء الشهري"
+      },
+      "example_output": {
+        "success": true,
+        "message_id": 988,
+        "file_id": "AgACAgIAAxk"
+      },
+      "token_estimate": 170,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"أرسل {media_type} إلى {chat_id}\\nالملف: {file_url}\\nالوصف: {caption}\",\n    system=\"أنت مرسل وسائط Telegram. أرسل الصور والملفات بكفاءة.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `أرسل ${media_type} إلى ${chat_id}\\nالملف: ${file_url}\\nالوصف: ${caption}`\n);",
+      "token_saving_tips": [
+        "استخدم file_id للملفات المرسلة مسبقاً",
+        "caption قصير (أقل من 200 حرف)"
+      ],
+      "notes": "حجم الملف محدود بـ 50MB للصور"
+    },
+    {
+      "id": "telegram_handle_inbound",
+      "integration": "telegram",
+      "intent": "معالجة رسائل Telegram الواردة",
+      "system_message": "أنت معالج رسائل Telegram ذكي. صنّف وردّ بذكاء.",
+      "user_message": "عالج الرسالة الواردة:\nمن: {{user}}\nالنص: {{message}}\nالإجراء المطلوب: {{action}}",
+      "assistant_instructions": "حلل الرسالة، صنّفها (سؤال/طلب/شكوى)، واقترح رد مناسب.",
+      "example_input": {
+        "user": "@username",
+        "message": "متى سيتم إطلاق الميزة الجديدة؟",
+        "action": "classify_and_respond"
+      },
+      "example_output": {
+        "classification": "question",
+        "sentiment": "neutral",
+        "suggested_response": "الميزة قيد التطوير، سنطلقها في Q1 2026",
+        "priority": "medium"
+      },
+      "token_estimate": 250,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"عالج الرسالة الواردة:\\nمن: {user}\\nالنص: {message}\\nالإجراء المطلوب: {action}\",\n    system=\"أنت معالج رسائل Telegram ذكي. صنّف وردّ بذكاء.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `عالج الرسالة الواردة:\\nمن: ${user}\\nالنص: ${message}\\nالإجراء المطلوب: ${action}`\n);",
+      "token_saving_tips": [
+        "استخدم keywords للتصنيف السريع",
+        "قوالب ردود جاهزة للأسئلة الشائعة"
+      ],
+      "notes": "لا تخزن رسائل المستخدمين بدون موافقة"
+    },
+    {
+      "id": "whatsapp_send_message",
+      "integration": "whatsapp",
+      "intent": "إرسال رسالة WhatsApp",
+      "system_message": "أنت مساعد WhatsApp Business. أرسل رسائل احترافية.",
+      "user_message": "أرسل رسالة WhatsApp إلى {{phone}}\nالنص: {{text}}",
+      "assistant_instructions": "استخدم WhatsApp Business API. تحقق من صيغة رقم الهاتف الدولية.",
+      "example_input": {
+        "phone": "+201234567890",
+        "text": "شكراً لتواصلك معنا. سنرد خلال 24 ساعة."
+      },
+      "example_output": {
+        "success": true,
+        "message_id": "wamid.ABC123"
+      },
+      "token_estimate": 140,
+      "python_wrapper": "claude.add_skill({'name': 'whatsapp', 'type': 'url', 'url': 'http://localhost:3005'})\nresponse = claude.chat(\n    prompt=f\"أرسل رسالة WhatsApp إلى {phone}\\nالنص: {text}\",\n    system=\"أنت مساعد WhatsApp Business. أرسل رسائل احترافية.\"\n)",
+      "node_wrapper": "await agent.addMCPServer({name: 'whatsapp', url: 'http://localhost:3005', type: 'url'});\nconst response = await agent.processMessage(\n  `أرسل رسالة WhatsApp إلى ${phone}\\nالنص: ${text}`\n);",
+      "token_saving_tips": [
+        "استخدم templates معتمدة للرسائل الترويجية",
+        "نص قصير ومباشر"
+      ],
+      "notes": "WhatsApp Business API يتطلب approval للـ templates"
+    },
+    {
+      "id": "whatsapp_send_template",
+      "integration": "whatsapp",
+      "intent": "إرسال قالب WhatsApp معتمد",
+      "system_message": "أنت مدير قوالب WhatsApp. أرسل قوالب معتمدة بشكل صحيح.",
+      "user_message": "أرسل قالب {{template}} إلى {{phone}}\nالمتغيرات: {{params}}",
+      "assistant_instructions": "استخدم approved templates فقط. املأ placeholders بالترتيب الصحيح.",
+      "example_input": {
+        "template": "order_confirmation",
+        "phone": "+201234567890",
+        "params": ["أحمد", "ORD-12345", "500 جنيه"]
+      },
+      "example_output": {
+        "success": true,
+        "message_id": "wamid.XYZ789",
+        "template_sent": "order_confirmation"
+      },
+      "token_estimate": 180,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"أرسل قالب {template} إلى {phone}\\nالمتغيرات: {params}\",\n    system=\"أنت مدير قوالب WhatsApp. أرسل قوالب معتمدة بشكل صحيح.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `أرسل قالب ${template} إلى ${phone}\\nالمتغيرات: ${JSON.stringify(params)}`\n);",
+      "token_saving_tips": [
+        "استخدم أقل عدد من المتغيرات",
+        "قوالب قصيرة ومباشرة"
+      ],
+      "notes": "Templates يجب أن تكون معتمدة من WhatsApp مسبقاً"
+    },
+    {
+      "id": "twitter_fetch_tweets",
+      "integration": "twitter",
+      "intent": "جلب تغريدات Twitter",
+      "system_message": "أنت محلل Twitter. اجلب وحلل التغريدات بذكاء.",
+      "user_message": "اجلب آخر {{count}} تغريدة عن {{query}}\nالتصفية: {{filter}}",
+      "assistant_instructions": "استخدم Twitter API v2 للبحث. طبّق filters وأرجع نتائج منسقة.",
+      "example_input": {
+        "count": 20,
+        "query": "#AI OR #MachineLearning",
+        "filter": "من آخر 24 ساعة، حسابات موثقة فقط"
+      },
+      "example_output": {
+        "total": 18,
+        "tweets": [
+          {"id": "123", "text": "AI is transforming...", "author": "@tech_expert", "likes": 450},
+          {"id": "124", "text": "New ML model...", "author": "@ai_researcher", "likes": 320}
+        ]
+      },
+      "token_estimate": 350,
+      "python_wrapper": "claude.add_skill({'name': 'twitter', 'type': 'url', 'url': 'http://localhost:3006'})\nresponse = claude.chat(\n    prompt=f\"اجلب آخر {count} تغريدة عن {query}\\nالتصفية: {filter}\",\n    system=\"أنت محلل Twitter. اجلب وحلل التغريدات بذكاء.\"\n)",
+      "node_wrapper": "await agent.addMCPServer({name: 'twitter', url: 'http://localhost:3006', type: 'url'});\nconst response = await agent.processMessage(\n  `اجلب آخر ${count} تغريدة عن ${query}\\nالتصفية: ${filter}`\n);",
+      "token_saving_tips": [
+        "حدد count منخفض (10-20)",
+        "استخدم advanced search operators",
+        "اطلب ملخص بدلاً من نصوص كاملة"
+      ],
+      "notes": "Twitter API لها rate limits صارمة"
+    },
+    {
+      "id": "twitter_create_thread",
+      "integration": "twitter",
+      "intent": "إنشاء thread على Twitter",
+      "system_message": "أنت كاتب Twitter محترف. أنشئ threads جذابة ومنظمة.",
+      "user_message": "أنشئ thread عن {{topic}}\nعدد التغريدات: {{count}}\nالنقاط الرئيسية: {{points}}",
+      "assistant_instructions": "اكتب thread متماسك. كل تغريدة <= 280 حرف. رقّم التغريدات (1/n, 2/n...).",
+      "example_input": {
+        "topic": "نصائح للإنتاجية",
+        "count": 5,
+        "points": ["تنظيم الوقت", "أدوات AI", "أتمتة المهام", "التركيز العميق", "الراحة"]
+      },
+      "example_output": {
+        "thread": [
+          "1/5 🚀 نصائح للإنتاجية في 2025:\\n\\nتنظيم الوقت هو المفتاح. استخدم تقنية Pomodoro...",
+          "2/5 💡 أدوات AI يمكن أن تضاعف إنتاجيتك. جرّب Claude Code...",
+          "3/5 🤖 أتمتة المهام المتكررة توفر ساعات يومياً...",
+          "4/5 🎯 التركيز العميق: أغلق الإشعارات لمدة 2-3 ساعات...",
+          "5/5 ⚡ لا تنسَ الراحة! الإنتاجية المستدامة تحتاج توازن..."
+        ],
+        "total_tweets": 5
+      },
+      "token_estimate": 450,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"أنشئ thread عن {topic}\\nعدد التغريدات: {count}\\nالنقاط الرئيسية: {points}\",\n    system=\"أنت كاتب Twitter محترف. أنشئ threads جذابة ومنظمة.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `أنشئ thread عن ${topic}\\nعدد التغريدات: ${count}\\nالنقاط الرئيسية: ${points.join(', ')}`\n);",
+      "token_saving_tips": [
+        "حدد عدد تغريدات محدود (5-7)",
+        "نقاط محددة بدلاً من محتوى عام",
+        "استخدم emojis بدلاً من كلمات إضافية"
+      ],
+      "notes": "راجع Twitter rules قبل النشر"
+    },
+    {
+      "id": "twitter_sentiment_analysis",
+      "integration": "twitter",
+      "intent": "تحليل المشاعر في Twitter",
+      "system_message": "أنت محلل مشاعر Twitter خبير. حلل الاتجاهات والمشاعر بدقة.",
+      "user_message": "حلل المشاعر حول {{topic}}\nآخر {{hours}} ساعة\nالتركيز: {{aspects}}",
+      "assistant_instructions": "اجمع التغريدات، حلل المشاعر (إيجابي/سلبي/محايد)، واستخرج insights.",
+      "example_input": {
+        "topic": "إطلاق iPhone الجديد",
+        "hours": 24,
+        "aspects": ["السعر", "الميزات", "التصميم"]
+      },
+      "example_output": {
+        "overall_sentiment": "إيجابي (65%)",
+        "breakdown": {
+          "positive": 65,
+          "negative": 20,
+          "neutral": 15
+        },
+        "aspects_sentiment": {
+          "السعر": "سلبي (60% يشتكون من السعر المرتفع)",
+          "الميزات": "إيجابي (75% معجبون بالكاميرا)",
+          "التصميم": "محايد (50-50)"
+        },
+        "trending_keywords": ["كاميرا رائعة", "سعر مرتفع", "تصميم جميل"]
+      },
+      "token_estimate": 600,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"حلل المشاعر حول {topic}\\nآخر {hours} ساعة\\nالتركيز: {aspects}\",\n    system=\"أنت محلل مشاعر Twitter خبير. حلل الاتجاهات والمشاعر بدقة.\",\n    max_tokens=2000\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `حلل المشاعر حول ${topic}\\nآخر ${hours} ساعة\\nالتركيز: ${aspects.join(', ')}`\n);",
+      "token_saving_tips": [
+        "حدد timeframe قصير (12-24 ساعة)",
+        "حلل sample من التغريدات (100-200) بدلاً من الكل",
+        "اطلب ملخص بدلاً من تحليل تفصيلي"
+      ],
+      "notes": "للدقة استخدم sentiment models محدثة"
+    },
+    {
+      "id": "reddit_fetch_thread",
+      "integration": "reddit",
+      "intent": "جلب تعليقات thread من Reddit",
+      "system_message": "أنت محلل Reddit. اجلب وحلل المناقشات بعمق.",
+      "user_message": "اجلب تعليقات post {{post_id}}\nالترتيب: {{sort}}\nالعمق: {{depth}}",
+      "assistant_instructions": "استخدم Reddit API لجلب التعليقات. نظّمها hierarchically.",
+      "example_input": {
+        "post_id": "abc123",
+        "sort": "top",
+        "depth": 2
+      },
+      "example_output": {
+        "post_title": "ما رأيكم في AI؟",
+        "total_comments": 145,
+        "top_comments": [
+          {
+            "author": "user1",
+            "text": "AI سيغير العالم...",
+            "score": 523,
+            "replies": 12
+          }
+        ]
+      },
+      "token_estimate": 500,
+      "python_wrapper": "claude.add_skill({'name': 'reddit', 'type': 'url', 'url': 'http://localhost:3007'})\nresponse = claude.chat(\n    prompt=f\"اجلب تعليقات post {post_id}\\nالترتيب: {sort}\\nالعمق: {depth}\",\n    system=\"أنت محلل Reddit. اجلب وحلل المناقشات بعمق.\"\n)",
+      "node_wrapper": "await agent.addMCPServer({name: 'reddit', url: 'http://localhost:3007', type: 'url'});\nconst response = await agent.processMessage(\n  `اجلب تعليقات post ${post_id}\\nالترتيب: ${sort}\\nالعمق: ${depth}`\n);",
+      "token_saving_tips": [
+        "حدد depth محدود (1-2)",
+        "اطلب top comments فقط (10-20)",
+        "تجنب nested replies العميقة"
+      ],
+      "notes": "Reddit API تتطلب user agent صحيح"
+    },
+    {
+      "id": "reddit_summarize_subreddit",
+      "integration": "reddit",
+      "intent": "تلخيص نشاط subreddit",
+      "system_message": "أنت محلل subreddit خبير. لخّص الاتجاهات والمواضيع الساخنة.",
+      "user_message": "لخّص r/{{subreddit}}\nالفترة: {{timeframe}}\nالتركيز: {{focus}}",
+      "assistant_instructions": "اجلب top posts، حلل المواضيع المشتركة، واستخرج insights.",
+      "example_input": {
+        "subreddit": "programming",
+        "timeframe": "week",
+        "focus": "أكثر المواضيع نقاشاً"
+      },
+      "example_output": {
+        "summary": "هذا الأسبوع: نقاشات حول Rust vs Go، AI coding tools، وأفضل practices للـ microservices",
+        "top_topics": [
+          {"topic": "Rust vs Go", "posts": 12, "avg_score": 450},
+          {"topic": "AI Coding", "posts": 8, "avg_score": 380}
+        ],
+        "trending": "GitHub Copilot alternatives"
+      },
+      "token_estimate": 550,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"لخّص r/{subreddit}\\nالفترة: {timeframe}\\nالتركيز: {focus}\",\n    system=\"أنت محلل subreddit خبير. لخّص الاتجاهات والمواضيع الساخنة.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `لخّص r/${subreddit}\\nالفترة: ${timeframe}\\nالتركيز: ${focus}`\n);",
+      "token_saving_tips": [
+        "حلل top 25 posts فقط",
+        "اطلب bullet points بدلاً من فقرات",
+        "استخدم keywords extraction بدلاً من تلخيص كامل"
+      ],
+      "notes": "بعض subreddits لها قواعد خاصة للـ scraping"
+    },
+    {
+      "id": "reddit_post_content",
+      "integration": "reddit",
+      "intent": "نشر محتوى على Reddit",
+      "system_message": "أنت كاتب Reddit محترف. أنشئ posts تتوافق مع قواعد subreddits.",
+      "user_message": "انشر في r/{{subreddit}}\nالعنوان: {{title}}\nالمحتوى: {{content}}\nالنوع: {{type}}",
+      "assistant_instructions": "تحقق من subreddit rules، اختر flair مناسب، وانشر بالصيغة الصحيحة.",
+      "example_input": {
+        "subreddit": "learnprogramming",
+        "title": "كيف أبدأ تعلم Python؟",
+        "content": "أريد تعلم Python للـ data science. ما المصادر الأفضل؟",
+        "type": "self"
+      },
+      "example_output": {
+        "success": true,
+        "post_id": "xyz789",
+        "url": "https://reddit.com/r/learnprogramming/xyz789",
+        "flair": "Question"
+      },
+      "token_estimate": 220,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"انشر في r/{subreddit}\\nالعنوان: {title}\\nالمحتوى: {content}\\nالنوع: {type}\",\n    system=\"أنت كاتب Reddit محترف. أنشئ posts تتوافق مع قواعد subreddits.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `انشر في r/${subreddit}\\nالعنوان: ${title}\\nالمحتوى: ${content}\\nالنوع: ${type}`\n);",
+      "token_saving_tips": [
+        "عنوان قصير وواضح",
+        "محتوى مباشر (تجنب المقدمات الطويلة)"
+      ],
+      "notes": "احترم subreddit rules لتجنب الحذف"
+    },
+    {
+      "id": "filesystem_read_summary",
+      "integration": "filesystem",
+      "intent": "قراءة ملف وتلخيصه",
+      "system_message": "أنت محلل ملفات. اقرأ ولخّص المحتوى بكفاءة.",
+      "user_message": "اقرأ الملف {{file_path}}\nلخّص في {{max_words}} كلمة\nالتركيز: {{focus}}",
+      "assistant_instructions": "اقرأ الملف، استخرج النقاط الرئيسية، ولخّص بالطول المطلوب.",
+      "example_input": {
+        "file_path": "/workspace/reports/q4-2025.md",
+        "max_words": 100,
+        "focus": "الأرقام المالية والتوصيات"
+      },
+      "example_output": {
+        "summary": "الإيرادات: 2.5M (نمو 20%). المصروفات: 1.8M. الربح: 700K. التوصيات: زيادة الاستثمار في التسويق، توظيف 5 مطورين.",
+        "word_count": 95
+      },
+      "token_estimate": 400,
+      "python_wrapper": "claude.add_skill({'name': 'filesystem', 'type': 'url', 'url': 'http://localhost:3008'})\nresponse = claude.chat(\n    prompt=f\"اقرأ الملف {file_path}\\nلخّص في {max_words} كلمة\\nالتركيز: {focus}\",\n    system=\"أنت محلل ملفات. اقرأ ولخّص المحتوى بكفاءة.\"\n)",
+      "node_wrapper": "await agent.addMCPServer({name: 'filesystem', url: 'http://localhost:3008', type: 'url'});\nconst response = await agent.processMessage(\n  `اقرأ الملف ${file_path}\\nلخّص في ${max_words} كلمة\\nالتركيز: ${focus}`\n);",
+      "token_saving_tips": [
+        "للملفات الكبيرة اقرأ أول/آخر N سطر فقط",
+        "حدد max_words صغير (50-100)",
+        "استخدم extractive summary"
+      ],
+      "notes": "تحقق من permissions قبل القراءة"
+    },
+    {
+      "id": "filesystem_write_template",
+      "integration": "filesystem",
+      "intent": "كتابة ملف من template",
+      "system_message": "أنت منشئ ملفات. أنشئ ملفات من templates بدقة.",
+      "user_message": "أنشئ ملف {{file_path}} من template {{template_name}}\nالمتغيرات: {{variables}}",
+      "assistant_instructions": "اقرأ template، املأ المتغيرات، واكتب الملف الناتج.",
+      "example_input": {
+        "file_path": "/workspace/reports/monthly-report-dec.md",
+        "template_name": "monthly-report-template",
+        "variables": {
+          "month": "ديسمبر",
+          "year": "2025",
+          "revenue": "500K",
+          "growth": "15%"
+        }
+      },
+      "example_output": {
+        "success": true,
+        "file_created": "/workspace/reports/monthly-report-dec.md",
+        "size": "2.3 KB"
+      },
+      "token_estimate": 280,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"أنشئ ملف {file_path} من template {template_name}\\nالمتغيرات: {json.dumps(variables, ensure_ascii=False)}\",\n    system=\"أنت منشئ ملفات. أنشئ ملفات من templates بدقة.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `أنشئ ملف ${file_path} من template ${template_name}\\nالمتغيرات: ${JSON.stringify(variables)}`\n);",
+      "token_saving_tips": [
+        "templates قصيرة ومحددة",
+        "متغيرات ضرورية فقط"
+      ],
+      "notes": "تحقق من عدم الكتابة فوق ملفات موجودة"
+    },
+    {
+      "id": "filesystem_extract_metadata",
+      "integration": "filesystem",
+      "intent": "استخراج metadata من ملفات",
+      "system_message": "أنت محلل metadata خبير. استخرج معلومات الملفات بدقة.",
+      "user_message": "استخرج metadata من {{pattern}}\nالمعلومات المطلوبة: {{fields}}",
+      "assistant_instructions": "ابحث عن الملفات matching pattern، استخرج metadata المطلوب.",
+      "example_input": {
+        "pattern": "*.md",
+        "fields": ["size", "modified_date", "line_count", "word_count"]
+      },
+      "example_output": {
+        "total_files": 23,
+        "files": [
+          {
+            "name": "README.md",
+            "size": "5.2 KB",
+            "modified": "2025-11-29",
+            "lines": 145,
+            "words": 892
+          }
+        ],
+        "total_size": "145 KB"
+      },
+      "token_estimate": 350,
+      "python_wrapper": "response = claude.chat(\n    prompt=f\"استخرج metadata من {pattern}\\nالمعلومات المطلوبة: {fields}\",\n    system=\"أنت محلل metadata خبير. استخرج معلومات الملفات بدقة.\"\n)",
+      "node_wrapper": "const response = await agent.processMessage(\n  `استخرج metadata من ${pattern}\\nالمعلومات المطلوبة: ${fields.join(', ')}`\n);",
+      "token_saving_tips": [
+        "حدد pattern دقيق لتقليل عدد الملفات",
+        "اطلب fields ضرورية فقط",
+        "للمجلدات الكبيرة استخدم pagination"
+      ],
+      "notes": "بعض metadata قد تحتاج صلاحيات خاصة"
+    }
+  ]
+}
