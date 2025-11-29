@@ -20,6 +20,7 @@ args = "AI Agent CLI"
 [[workflows.workflow]]
 name = "AI Agent CLI"
 author = "agent"
+mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
