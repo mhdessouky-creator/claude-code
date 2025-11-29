@@ -1,0 +1,15 @@
+{
+  "name": "@mcp/telegram",
+  "version": "1.0.0",
+  "description": "Telegram Bot MCP Server",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.64.0",
+    "dotenv": "^16.3.1"
+  }
+}

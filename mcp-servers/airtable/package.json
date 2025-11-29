@@ -1,0 +1,15 @@
+{
+  "name": "@mcp/airtable",
+  "version": "1.0.0",
+  "description": "Airtable MCP Server with Webhooks",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "airtable": "^0.12.2",
+    "dotenv": "^16.3.1"
+  }
+}
