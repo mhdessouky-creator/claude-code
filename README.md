@@ -163,6 +163,7 @@ digital-life-ai-agent/
 - [x] واجهة CLI تفاعلية
 - [x] جدولة المهام
 - [x] 🆕 دعم MCP (Model Context Protocol)
+- [x] 🏈 وحدة تحليل Fantasy Football
 - [ ] واجهة ويب
 - [ ] تكامل مع Google Calendar
 - [ ] دعم الأوامر الصوتية
@@ -173,6 +174,7 @@ digital-life-ai-agent/
 
 - 📖 [دليل المستخدم الشامل](./AGENT_GUIDE.md)
 - 🔌 [دليل MCP Integration](./docs/MCP_GUIDE.md)
+- 🏈 [دليل Fantasy Football Module](./docs/FANTASY_FOOTBALL.md)
 - 🔧 [أمثلة متقدمة](./examples/)
 - 🎯 [دليل التطوير](./guides/)
 
