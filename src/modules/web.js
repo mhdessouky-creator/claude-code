@@ -16,17 +16,17 @@ export class WebModule {
     const action = this._determineAction(task.description);
 
     switch (action) {
-      case 'search':
-        return await this._webSearch(task);
-      case 'fetch':
-        return await this._fetchUrl(task);
-      case 'monitor':
-        return await this._monitorWebsite(task);
-      default:
-        return {
-          success: false,
-          message: 'Web action not recognized',
-        };
+    case 'search':
+      return await this._webSearch(task);
+    case 'fetch':
+      return await this._fetchUrl(task);
+    case 'monitor':
+      return await this._monitorWebsite(task);
+    default:
+      return {
+        success: false,
+        message: 'Web action not recognized',
+      };
     }
   }
 

@@ -17,19 +17,19 @@ export class FileModule {
     const action = this._determineAction(task.description);
 
     switch (action) {
-      case 'organize':
-        return await this._organizeFiles(task);
-      case 'search':
-        return await this._searchFiles(task);
-      case 'backup':
-        return await this._backupFiles(task);
-      case 'clean':
-        return await this._cleanFiles(task);
-      default:
-        return {
-          success: false,
-          message: 'File action not recognized',
-        };
+    case 'organize':
+      return await this._organizeFiles(task);
+    case 'search':
+      return await this._searchFiles(task);
+    case 'backup':
+      return await this._backupFiles(task);
+    case 'clean':
+      return await this._cleanFiles(task);
+    default:
+      return {
+        success: false,
+        message: 'File action not recognized',
+      };
     }
   }
 

@@ -40,15 +40,15 @@ export class EmailModule {
     const action = this._determineAction(task.description);
 
     switch (action) {
-      case 'send':
-        return await this._sendEmail(task);
-      case 'schedule':
-        return await this._scheduleEmail(task);
-      default:
-        return {
-          success: false,
-          message: 'Email action not recognized',
-        };
+    case 'send':
+      return await this._sendEmail(task);
+    case 'schedule':
+      return await this._scheduleEmail(task);
+    default:
+      return {
+        success: false,
+        message: 'Email action not recognized',
+      };
     }
   }
 

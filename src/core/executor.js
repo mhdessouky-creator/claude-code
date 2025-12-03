@@ -149,7 +149,7 @@ export class TaskExecutor {
       return {
         success: true,
         taskId,
-        message: `Task scheduled successfully`,
+        message: 'Task scheduled successfully',
       };
     } catch (error) {
       logger.error('Failed to schedule task:', error);

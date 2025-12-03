@@ -28,27 +28,27 @@ export class FantasyFootballModule {
     const action = this._determineAction(task.description);
 
     switch (action) {
-      case 'compare':
-        return await this._comparePlayers(task);
-      case 'optimize':
-        return await this._optimizeLineup(task);
-      case 'analyze_trade':
-        return await this._analyzeTrade(task);
-      case 'matchup':
-        return await this._analyzeMatchup(task);
-      case 'injury_impact':
-        return await this._analyzeInjuryImpact(task);
-      case 'scenario':
-        return await this._simulateScenario(task);
-      case 'waiver':
-        return await this._analyzeWaiverPick(task);
-      case 'ros_ranking':
-        return await this._generateROSRankings(task);
-      default:
-        return {
-          success: false,
-          message: 'Fantasy football action not recognized',
-        };
+    case 'compare':
+      return await this._comparePlayers(task);
+    case 'optimize':
+      return await this._optimizeLineup(task);
+    case 'analyze_trade':
+      return await this._analyzeTrade(task);
+    case 'matchup':
+      return await this._analyzeMatchup(task);
+    case 'injury_impact':
+      return await this._analyzeInjuryImpact(task);
+    case 'scenario':
+      return await this._simulateScenario(task);
+    case 'waiver':
+      return await this._analyzeWaiverPick(task);
+    case 'ros_ranking':
+      return await this._generateROSRankings(task);
+    default:
+      return {
+        success: false,
+        message: 'Fantasy football action not recognized',
+      };
     }
   }
 
@@ -100,7 +100,7 @@ export class FantasyFootballModule {
 
       return {
         success: true,
-        message: `Player comparison completed`,
+        message: 'Player comparison completed',
         comparison: comparison,
         recommendation: comparison.recommendation,
       };
@@ -491,7 +491,7 @@ export class FantasyFootballModule {
 
     return {
       topChoice: sorted[0].name,
-      reason: `Higher projected score and better matchup`,
+      reason: 'Higher projected score and better matchup',
       confidence: 'Medium',
       alternativeOptions: sorted.slice(1).map(a => a.name),
     };

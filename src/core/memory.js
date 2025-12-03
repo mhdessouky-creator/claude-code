@@ -196,7 +196,7 @@ export class MemoryManager {
 
     try {
       const row = await get(
-        `SELECT value FROM preferences WHERE key = ?`,
+        'SELECT value FROM preferences WHERE key = ?',
         [key]
       );
 
@@ -269,9 +269,9 @@ export class MemoryManager {
     const get = promisify(this.db.get.bind(this.db));
 
     return Promise.all([
-      get(`SELECT COUNT(*) as count FROM conversations`),
-      get(`SELECT COUNT(*) as count FROM tasks_history`),
-      get(`SELECT COUNT(*) as count FROM preferences`),
+      get('SELECT COUNT(*) as count FROM conversations'),
+      get('SELECT COUNT(*) as count FROM tasks_history'),
+      get('SELECT COUNT(*) as count FROM preferences'),
     ]).then(([conversations, tasks, preferences]) => ({
       totalConversations: conversations.count,
       totalTasks: tasks.count,
