@@ -48,6 +48,15 @@ check_environment() {
         HAS_PYTHON=false
     fi
 
+    # التحقق من أدوات البناء (مطلوبة لـ sqlite3)
+    if command -v clang &> /dev/null && command -v make &> /dev/null; then
+        echo -e "${GREEN}✓ أدوات البناء موجودة${NC}"
+        HAS_BUILD_TOOLS=true
+    else
+        echo -e "${YELLOW}⚠ أدوات البناء غير مثبتة (مطلوبة لـ sqlite3)${NC}"
+        HAS_BUILD_TOOLS=false
+    fi
+
     # التحقق من وجود Git
     if command -v git &> /dev/null; then
         GIT_VERSION=$(git --version)
@@ -57,6 +66,52 @@ check_environment() {
     fi
 
     echo ""
+
+    # إذا كانت المتطلبات الأساسية مفقودة، اعرض حل سريع
+    if [ "$HAS_PYTHON" = false ] || [ "$HAS_BUILD_TOOLS" = false ]; then
+        echo -e "${YELLOW}═══════════════════════════════════════════════════════════${NC}"
+        echo -e "${RED}⚠️  تنبيه: متطلبات sqlite3 مفقودة!${NC}"
+        echo -e "${YELLOW}═══════════════════════════════════════════════════════════${NC}"
+        echo ""
+        echo -e "${CYAN}حزمة sqlite3 تحتاج إلى Python وأدوات البناء للعمل.${NC}"
+        echo ""
+        echo -e "${YELLOW}هل تريد تشغيل سكريبت الإعداد التلقائي؟ (موصى به)${NC}"
+        echo -e "  ${GREEN}y${NC} - نعم، قم بتثبيت المتطلبات تلقائياً"
+        echo -e "  ${RED}n${NC} - لا، سأقوم بالتثبيت يدوياً"
+        echo ""
+        read -p "اختر (y/n): " run_setup
+
+        if [ "$run_setup" = "y" ] || [ "$run_setup" = "Y" ]; then
+            if [ -f "setup-termux.sh" ]; then
+                echo -e "${GREEN}⏳ جاري تشغيل سكريبت الإعداد...${NC}"
+                chmod +x setup-termux.sh
+                ./setup-termux.sh
+                echo ""
+                echo -e "${CYAN}الآن قم بتثبيت متطلبات المشروع:${NC}"
+                echo -e "  ${YELLOW}npm install${NC}"
+                echo ""
+                read -p "اضغط Enter للمتابعة..."
+                # إعادة التحقق من البيئة
+                check_environment
+            else
+                echo -e "${RED}✗ ملف setup-termux.sh غير موجود${NC}"
+                echo ""
+                echo -e "${CYAN}قم بالتثبيت يدوياً:${NC}"
+                echo -e "  ${YELLOW}pkg install python python-pip build-essential clang make${NC}"
+                echo ""
+            fi
+        else
+            echo ""
+            echo -e "${CYAN}📝 للتثبيت يدوياً، قم بتشغيل:${NC}"
+            echo -e "  ${YELLOW}pkg install python python-pip build-essential clang make binutils${NC}"
+            echo -e "  ${YELLOW}npm config set python \"\$(which python)\"${NC}"
+            echo -e "  ${YELLOW}npm install${NC}"
+            echo ""
+            echo -e "${MAGENTA}💡 أو راجع ملف: FIX_SQLITE3_ERROR.md${NC}"
+            echo ""
+            read -p "اضغط Enter للمتابعة..."
+        fi
+    fi
 }
 
 # تثبيت المتطلبات

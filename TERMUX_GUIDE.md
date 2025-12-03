@@ -8,6 +8,37 @@
 
 ## ⚙️ التثبيت الأولي
 
+### 🚀 طريقة سريعة: السكريبت التلقائي (موصى به)
+
+```bash
+# 1. استنساخ المشروع
+git clone https://github.com/mhdessouky-creator/claude-code.git
+cd claude-code
+
+# 2. تشغيل سكريبت الإعداد التلقائي
+chmod +x setup-termux.sh
+./setup-termux.sh
+
+# 3. تثبيت متطلبات المشروع
+npm install
+
+# 4. إعداد البيئة
+cp .env.example .env
+nano .env  # أضف ANTHROPIC_API_KEY
+
+# 5. تشغيل الوكيل
+./start-agent.sh
+```
+
+**السكريبت التلقائي يقوم بـ:**
+- ✅ تثبيت Node.js و Python
+- ✅ تثبيت أدوات البناء (build-essential, clang, make)
+- ✅ تكوين npm للعمل مع Termux
+- ✅ تثبيت Git
+- ✅ عرض معلومات البيئة
+
+### 📝 طريقة يدوية: خطوة بخطوة
+
 ### الخطوة 1: تثبيت المتطلبات الأساسية
 
 ```bash
@@ -17,8 +48,11 @@ pkg update && pkg upgrade
 # تثبيت Node.js و Git
 pkg install nodejs git
 
-# تثبيت Python (اختياري - للوكيل Python)
-pkg install python
+# تثبيت Python (مطلوب لبناء sqlite3)
+pkg install python python-pip
+
+# تثبيت أدوات البناء (مطلوب لبناء sqlite3)
+pkg install build-essential clang make binutils
 
 # السماح بالوصول إلى التخزين (اختياري)
 termux-setup-storage
@@ -207,14 +241,35 @@ termux-change-repo
 npm install
 ```
 
-### المشكلة 7: `sqlite3` فشل التثبيت
+### المشكلة 7: `sqlite3` فشل التثبيت / `gyp ERR! find Python`
 
-**الحل:**
+**السبب:** حزمة `sqlite3` تحتاج إلى node-gyp للبناء، و node-gyp يحتاج إلى Python وأدوات البناء.
+
+**الحل الكامل:**
 ```bash
-# تثبيت أدوات البناء المطلوبة
-pkg install build-essential
+# 1. تثبيت Python وأدوات البناء
+pkg install python python-pip
+pkg install build-essential clang make binutils
 
-# إعادة محاولة التثبيت
+# 2. تكوين npm لاستخدام Python
+npm config set python "$(which python)"
+
+# 3. مسح الحزم القديمة وإعادة التثبيت
+rm -rf node_modules package-lock.json
+npm cache clean --force
+npm install
+
+# 4. إذا استمرت المشكلة، أعد بناء sqlite3 مباشرة
+npm rebuild sqlite3
+```
+
+**الحل السريع (استخدام السكريبت):**
+```bash
+# استخدم سكريبت الإعداد التلقائي
+chmod +x setup-termux.sh
+./setup-termux.sh
+
+# ثم ثبت المتطلبات
 npm install
 ```
 
@@ -348,22 +403,50 @@ pip install -r requirements.txt
 
 ## 🚀 Quick Start
 
+### Automated Setup (Recommended)
+
+```bash
+# 1. Clone project
+git clone https://github.com/mhdessouky-creator/claude-code.git
+cd claude-code
+
+# 2. Run automated setup script
+chmod +x setup-termux.sh
+./setup-termux.sh
+
+# 3. Install project dependencies
+npm install
+
+# 4. Setup environment
+cp .env.example .env
+nano .env  # Add your ANTHROPIC_API_KEY
+
+# 5. Run the agent
+./start-agent.sh
+```
+
+### Manual Setup
+
 ```bash
 # 1. Install requirements
 pkg update && pkg upgrade
-pkg install nodejs git
+pkg install nodejs git python python-pip
+pkg install build-essential clang make binutils
 
 # 2. Clone project
 git clone https://github.com/mhdessouky-creator/claude-code.git
 cd claude-code
 
-# 3. Setup
+# 3. Configure npm for Termux
+npm config set python "$(which python)"
+
+# 4. Setup
 chmod +x start-agent.sh
 npm install
 cp .env.example .env
 nano .env  # Add your ANTHROPIC_API_KEY
 
-# 4. Run
+# 5. Run
 ./start-agent.sh
 ```
 
