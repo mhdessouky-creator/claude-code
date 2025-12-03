@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from agents.brain import BaseAgent
 from agents.tasks_agent import TasksAgent
+from agents.gmail_agent import GmailAgent
 from config.settings import config
 
 
@@ -31,8 +32,9 @@ def print_menu():
     print(f"{Fore.GREEN}القائمة الرئيسية:{Style.RESET_ALL}")
     print(f"  {Fore.CYAN}1{Style.RESET_ALL}. محادثة مع الوكيل (Chat)")
     print(f"  {Fore.CYAN}2{Style.RESET_ALL}. إدارة المهام (Tasks)")
-    print(f"  {Fore.CYAN}3{Style.RESET_ALL}. عرض الإعدادات (Settings)")
-    print(f"  {Fore.CYAN}4{Style.RESET_ALL}. خروج (Exit)")
+    print(f"  {Fore.CYAN}3{Style.RESET_ALL}. 📧 إدارة Gmail (Gmail)")
+    print(f"  {Fore.CYAN}4{Style.RESET_ALL}. عرض الإعدادات (Settings)")
+    print(f"  {Fore.CYAN}5{Style.RESET_ALL}. خروج (Exit)")
     print(f"{Fore.YELLOW}═══════════════════════════════════════════════════════════{Style.RESET_ALL}")
 
 
@@ -132,6 +134,139 @@ def tasks_mode():
             print(f"{Fore.RED}خيار غير صحيح{Style.RESET_ALL}")
 
 
+def gmail_mode():
+    """وضع إدارة Gmail"""
+    print(f"\n{Fore.GREEN}مرحباً بك في وضع إدارة Gmail{Style.RESET_ALL}")
+
+    try:
+        gmail_agent = GmailAgent(
+            credentials_file=config.GMAIL_CREDENTIALS_FILE,
+            token_file=config.GMAIL_TOKEN_FILE
+        )
+    except Exception as e:
+        print(f"{Fore.RED}خطأ في إنشاء وكيل Gmail: {e}{Style.RESET_ALL}")
+        return
+
+    # المصادقة
+    if not gmail_agent.authenticate():
+        print(f"{Fore.RED}فشلت المصادقة. يرجى التحقق من الإعدادات{Style.RESET_ALL}")
+        return
+
+    while True:
+        print(f"\n{Fore.YELLOW}═══════════════════════════════════════════════════════════{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}قائمة Gmail:{Style.RESET_ALL}")
+        print(f"  {Fore.CYAN}1{Style.RESET_ALL}. 📧 قراءة الرسائل غير المقروءة")
+        print(f"  {Fore.CYAN}2{Style.RESET_ALL}. 🔍 البحث في الرسائل")
+        print(f"  {Fore.CYAN}3{Style.RESET_ALL}. ✍️  كتابة وإرسال رسالة (بمساعدة AI)")
+        print(f"  {Fore.CYAN}4{Style.RESET_ALL}. 📝 تلخيص رسالة")
+        print(f"  {Fore.CYAN}5{Style.RESET_ALL}. 📊 عرض الإحصائيات")
+        print(f"  {Fore.CYAN}6{Style.RESET_ALL}. 🤖 أمر مخصص (AI Command)")
+        print(f"  {Fore.CYAN}7{Style.RESET_ALL}. 🧹 تنظيف ذكي للبريد")
+        print(f"  {Fore.CYAN}8{Style.RESET_ALL}. العودة للقائمة الرئيسية")
+        print(f"{Fore.YELLOW}═══════════════════════════════════════════════════════════{Style.RESET_ALL}")
+
+        choice = input(f"{Fore.CYAN}اختر خياراً:{Style.RESET_ALL} ").strip()
+
+        if choice == "1":
+            # قراءة الرسائل غير المقروءة
+            num = input(f"{Fore.CYAN}عدد الرسائل (افتراضي 10):{Style.RESET_ALL} ").strip()
+            max_results = int(num) if num.isdigit() else 10
+
+            messages = gmail_agent.read_unread_emails(max_results)
+            if messages:
+                for i, msg in enumerate(messages[:5], 1):
+                    print(f"\n{Fore.MAGENTA}── رسالة {i} ──{Style.RESET_ALL}")
+                    gmail_agent.print_email(msg, show_body=False)
+
+                # عرض خيارات إضافية
+                action = input(f"\n{Fore.CYAN}عرض رسالة كاملة؟ (أدخل الرقم أو enter للتخطي):{Style.RESET_ALL} ").strip()
+                if action.isdigit() and 1 <= int(action) <= len(messages):
+                    gmail_agent.print_email(messages[int(action) - 1], show_body=True)
+
+        elif choice == "2":
+            # البحث
+            query = input(f"{Fore.CYAN}أدخل استعلام البحث:{Style.RESET_ALL} ").strip()
+            if query:
+                messages = gmail_agent.search_emails(query, 10)
+                if messages:
+                    for i, msg in enumerate(messages[:5], 1):
+                        print(f"\n{Fore.MAGENTA}── نتيجة {i} ──{Style.RESET_ALL}")
+                        gmail_agent.print_email(msg, show_body=False)
+
+        elif choice == "3":
+            # كتابة وإرسال رسالة
+            print(f"\n{Fore.GREEN}── كتابة رسالة جديدة بمساعدة AI ──{Style.RESET_ALL}")
+            to = input(f"{Fore.CYAN}إلى (البريد الإلكتروني):{Style.RESET_ALL} ").strip()
+            subject = input(f"{Fore.CYAN}الموضوع:{Style.RESET_ALL} ").strip()
+            context = input(f"{Fore.CYAN}المحتوى أو السياق:{Style.RESET_ALL} ").strip()
+            tone = input(f"{Fore.CYAN}النبرة (professional/friendly/formal):{Style.RESET_ALL} ").strip() or 'professional'
+
+            if to and subject and context:
+                print(f"\n{Fore.MAGENTA}⟳ جاري صياغة الرسالة...{Style.RESET_ALL}")
+                email_body = gmail_agent.compose_email_with_ai(to, subject, context, tone)
+
+                print(f"\n{Fore.GREEN}── الرسالة المُصاغة ──{Style.RESET_ALL}")
+                print(email_body)
+
+                confirm = input(f"\n{Fore.CYAN}إرسال الرسالة؟ (y/n):{Style.RESET_ALL} ").strip().lower()
+                if confirm == 'y':
+                    if gmail_agent.send_email(to, subject, email_body):
+                        print(f"{Fore.GREEN}✅ تم إرسال الرسالة بنجاح!{Style.RESET_ALL}")
+                    else:
+                        print(f"{Fore.RED}❌ فشل إرسال الرسالة{Style.RESET_ALL}")
+            else:
+                print(f"{Fore.YELLOW}يرجى ملء جميع الحقول{Style.RESET_ALL}")
+
+        elif choice == "4":
+            # تلخيص رسالة
+            msg_id = input(f"{Fore.CYAN}أدخل معرف الرسالة (أو ابحث أولاً):{Style.RESET_ALL} ").strip()
+            if msg_id:
+                print(f"\n{Fore.MAGENTA}⟳ جاري التلخيص...{Style.RESET_ALL}")
+                summary = gmail_agent.summarize_email(msg_id)
+                print(f"\n{Fore.GREEN}── الملخص ──{Style.RESET_ALL}")
+                print(summary)
+            else:
+                # تلخيص الرسائل غير المقروءة
+                messages = gmail_agent.read_unread_emails(5)
+                if messages:
+                    print(f"\n{Fore.MAGENTA}⟳ جاري تحليل الرسائل...{Style.RESET_ALL}")
+                    analysis = gmail_agent.analyze_emails_sentiment(messages)
+                    print(f"\n{Fore.GREEN}── التحليل ──{Style.RESET_ALL}")
+                    print(analysis)
+
+        elif choice == "5":
+            # الإحصائيات
+            print(f"\n{Fore.MAGENTA}⟳ جاري جمع الإحصائيات...{Style.RESET_ALL}")
+            stats = gmail_agent.get_email_statistics()
+            print(f"\n{Fore.GREEN}── إحصائيات Gmail ──{Style.RESET_ALL}")
+            for key, value in stats.items():
+                print(f"  {Fore.CYAN}{key}:{Style.RESET_ALL} {value}")
+
+        elif choice == "6":
+            # أمر مخصص
+            command = input(f"{Fore.CYAN}أدخل الأمر:{Style.RESET_ALL} ").strip()
+            if command:
+                print(f"\n{Fore.MAGENTA}⟳ جاري المعالجة...{Style.RESET_ALL}")
+                result = gmail_agent.process_command(command)
+                print(f"\n{Fore.GREEN}── النتيجة ──{Style.RESET_ALL}")
+                print(result)
+
+        elif choice == "7":
+            # تنظيف ذكي
+            confirm = input(f"{Fore.YELLOW}⚠️  هل أنت متأكد من التنظيف الذكي؟ (y/n):{Style.RESET_ALL} ").strip().lower()
+            if confirm == 'y':
+                stats = gmail_agent.smart_inbox_cleanup()
+                print(f"\n{Fore.GREEN}تم التنظيف:{Style.RESET_ALL}")
+                for key, value in stats.items():
+                    print(f"  {Fore.CYAN}{key}:{Style.RESET_ALL} {value}")
+
+        elif choice == "8":
+            break
+
+        else:
+            print(f"{Fore.RED}خيار غير صحيح{Style.RESET_ALL}")
+
+
 def show_settings():
     """عرض الإعدادات"""
     print(f"\n{Fore.MAGENTA}╔══════════════════════════════════════╗{Style.RESET_ALL}")
@@ -145,6 +280,8 @@ def show_settings():
         print(f"  {Fore.CYAN}العنوان:{Style.RESET_ALL} {config.OLLAMA_BASE_URL}")
     print(f"  {Fore.CYAN}درجة الحرارة:{Style.RESET_ALL} {config.TEMPERATURE}")
     print(f"  {Fore.CYAN}الحد الأقصى للرموز:{Style.RESET_ALL} {config.MAX_TOKENS}")
+    print(f"  {Fore.CYAN}Gmail Credentials:{Style.RESET_ALL} {config.GMAIL_CREDENTIALS_FILE}")
+    print(f"  {Fore.CYAN}Gmail Token:{Style.RESET_ALL} {config.GMAIL_TOKEN_FILE}")
 
 
 def main():
@@ -173,8 +310,10 @@ def main():
         elif choice == "2":
             tasks_mode()
         elif choice == "3":
-            show_settings()
+            gmail_mode()
         elif choice == "4":
+            show_settings()
+        elif choice == "5":
             print(f"\n{Fore.GREEN}شكراً لاستخدامك الوكيل الذكي. وداعاً!{Style.RESET_ALL}\n")
             break
         else:
