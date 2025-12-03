@@ -40,6 +40,23 @@ npm run build
 npm start
 ```
 
+### 📱 التثبيت على Termux (Android)
+
+للمستخدمين الذين يرغبون في تشغيل المشروع على Termux:
+
+```bash
+# 1. تثبيت المتطلبات
+pkg install nodejs python git build-essential
+
+# 2. إصلاح مشكلة node-gyp (مهم جداً!)
+./fix-termux-gyp.sh
+
+# 3. أو استخدام السكريبت التفاعلي
+./start-agent.sh
+```
+
+📖 **[دليل Termux الشامل](./TERMUX_SETUP.md)** - حل جميع مشاكل التثبيت على Termux
+
 ### الحصول على API Key
 
 1. سجل في [Anthropic Console](https://console.anthropic.com)
@@ -191,6 +208,19 @@ node --version  # تحقق من الإصدار
 # الحل: تأكد من إضافة المفتاح في .env
 echo $ANTHROPIC_API_KEY  # للتحقق
 ```
+
+### المشكلة: `ModuleNotFoundError: No module named 'distutils'` في Termux
+```bash
+# الحل السريع
+./fix-termux-gyp.sh
+
+# أو يدوياً
+pip install --upgrade setuptools
+rm -rf node_modules
+npm install
+```
+
+📖 **[دليل استكشاف الأخطاء الكامل لـ Termux](./TERMUX_SETUP.md#common-issues---المشاكل-الشائعة)**
 
 ## 🧪 الاختبار
 

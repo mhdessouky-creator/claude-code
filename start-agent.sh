@@ -74,6 +74,11 @@ install_dependencies() {
     case $choice in
         1)
             if [ "$HAS_NODE" = true ]; then
+                # تثبيت setuptools أولاً لدعم node-gyp
+                if [ "$HAS_PYTHON" = true ]; then
+                    echo -e "${YELLOW}⏳ جاري تثبيت setuptools (مطلوب لـ node-gyp)...${NC}"
+                    pip install setuptools --upgrade 2>/dev/null || true
+                fi
                 echo -e "${YELLOW}⏳ جاري تثبيت متطلبات Node.js...${NC}"
                 npm install
                 echo -e "${GREEN}✓ تم تثبيت متطلبات Node.js${NC}"
@@ -84,6 +89,7 @@ install_dependencies() {
         2)
             if [ "$HAS_PYTHON" = true ]; then
                 echo -e "${YELLOW}⏳ جاري تثبيت متطلبات Python...${NC}"
+                pip install --upgrade pip setuptools 2>/dev/null || true
                 pip install -r requirements.txt
                 echo -e "${GREEN}✓ تم تثبيت متطلبات Python${NC}"
             else
@@ -91,15 +97,16 @@ install_dependencies() {
             fi
             ;;
         3)
+            if [ "$HAS_PYTHON" = true ]; then
+                echo -e "${YELLOW}⏳ جاري تثبيت متطلبات Python وsetuptools...${NC}"
+                pip install --upgrade pip setuptools 2>/dev/null || true
+                pip install -r requirements.txt
+                echo -e "${GREEN}✓ تم تثبيت متطلبات Python${NC}"
+            fi
             if [ "$HAS_NODE" = true ]; then
                 echo -e "${YELLOW}⏳ جاري تثبيت متطلبات Node.js...${NC}"
                 npm install
                 echo -e "${GREEN}✓ تم تثبيت متطلبات Node.js${NC}"
-            fi
-            if [ "$HAS_PYTHON" = true ]; then
-                echo -e "${YELLOW}⏳ جاري تثبيت متطلبات Python...${NC}"
-                pip install -r requirements.txt
-                echo -e "${GREEN}✓ تم تثبيت متطلبات Python${NC}"
             fi
             ;;
         4)
