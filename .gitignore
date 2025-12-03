@@ -47,8 +47,8 @@ coverage/
 Thumbs.db
 Desktop.ini
 
-# Package managers
-package-lock.json
+# Package managers (lock files should be committed for consistency)
+# Note: package-lock.json is now tracked for CI/CD consistency
 yarn.lock
 pnpm-lock.yaml
 
