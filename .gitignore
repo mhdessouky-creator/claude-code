@@ -67,3 +67,9 @@ data/
 # Documentation builds
 docs/_build/
 site/
+
+# Gmail credentials and tokens (sensitive)
+credentials.json
+token.pickle
+token.json
+client_secret*.json

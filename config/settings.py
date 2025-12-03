@@ -27,5 +27,9 @@ class Config:
     PROJECT_NAME = "ذكي الوكيل - Intelligent Agent"
     DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
+    # Gmail Settings
+    GMAIL_CREDENTIALS_FILE = os.getenv("GMAIL_CREDENTIALS_FILE", "credentials.json")
+    GMAIL_TOKEN_FILE = os.getenv("GMAIL_TOKEN_FILE", "token.pickle")
+
 # إنشاء نسخة واحدة من الإعدادات
 config = Config()
