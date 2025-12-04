@@ -13,6 +13,14 @@ from agents.brain import BaseAgent
 from agents.tasks_agent import TasksAgent
 from agents.gmail_agent import GmailAgent
 from config.settings import config
+from utils.arabic_helper import fix_arabic_text, is_termux
+
+
+def print_text(text: str, **kwargs):
+    """طباعة نص مع إصلاح العربي في Termux"""
+    if is_termux():
+        text = fix_arabic_text(text)
+    print(text, **kwargs)
 
 
 def print_banner():
@@ -23,24 +31,25 @@ def print_banner():
 ║          مساعد ذكي قائم على الذكاء الاصطناعي            ║
 ╚════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
 """
-    print(banner)
+    print_text(banner)
 
 
 def print_menu():
     """طباعة القائمة الرئيسية"""
-    print(f"\n{Fore.YELLOW}═══════════════════════════════════════════════════════════{Style.RESET_ALL}")
-    print(f"{Fore.GREEN}القائمة الرئيسية:{Style.RESET_ALL}")
-    print(f"  {Fore.CYAN}1{Style.RESET_ALL}. محادثة مع الوكيل (Chat)")
-    print(f"  {Fore.CYAN}2{Style.RESET_ALL}. إدارة المهام (Tasks)")
-    print(f"  {Fore.CYAN}3{Style.RESET_ALL}. 📧 إدارة Gmail (Gmail)")
-    print(f"  {Fore.CYAN}4{Style.RESET_ALL}. عرض الإعدادات (Settings)")
-    print(f"  {Fore.CYAN}5{Style.RESET_ALL}. خروج (Exit)")
-    print(f"{Fore.YELLOW}═══════════════════════════════════════════════════════════{Style.RESET_ALL}")
+    print_text(f"\n{Fore.YELLOW}═══════════════════════════════════════════════════════════{Style.RESET_ALL}")
+    print_text(f"{Fore.GREEN}القائمة الرئيسية:{Style.RESET_ALL}")
+    print_text(f"  {Fore.CYAN}1{Style.RESET_ALL}. محادثة مع الوكيل (Chat)")
+    print_text(f"  {Fore.CYAN}2{Style.RESET_ALL}. إدارة المهام (Tasks)")
+    print_text(f"  {Fore.CYAN}3{Style.RESET_ALL}. 📧 إدارة Gmail (Gmail)")
+    print_text(f"  {Fore.CYAN}4{Style.RESET_ALL}. تغيير مزود الذكاء الاصطناعي (Change AI Provider)")
+    print_text(f"  {Fore.CYAN}5{Style.RESET_ALL}. عرض الإعدادات (Settings)")
+    print_text(f"  {Fore.CYAN}6{Style.RESET_ALL}. خروج (Exit)")
+    print_text(f"{Fore.YELLOW}═══════════════════════════════════════════════════════════{Style.RESET_ALL}")
 
 
 def chat_mode(agent: BaseAgent):
     """وضع المحادثة التفاعلي"""
-    print(f"\n{Fore.GREEN}مرحباً! أنت الآن في وضع المحادثة. اكتب 'خروج' أو 'exit' للعودة{Style.RESET_ALL}")
+    print_text(f"\n{Fore.GREEN}مرحباً! أنت الآن في وضع المحادثة. اكتب 'خروج' أو 'exit' للعودة{Style.RESET_ALL}")
 
     while True:
         try:
@@ -52,15 +61,15 @@ def chat_mode(agent: BaseAgent):
             if not user_input:
                 continue
 
-            print(f"{Fore.MAGENTA}⟳ جاري المعالجة...{Style.RESET_ALL}")
+            print_text(f"{Fore.MAGENTA}⟳ جاري المعالجة...{Style.RESET_ALL}")
             response = agent.get_response(user_input)
-            print(f"\n{Fore.GREEN}الوكيل:{Style.RESET_ALL}\n{response}")
+            print_text(f"\n{Fore.GREEN}الوكيل:{Style.RESET_ALL}\n{response}")
 
         except KeyboardInterrupt:
-            print(f"\n{Fore.YELLOW}تم الإيقاف من قبل المستخدم{Style.RESET_ALL}")
+            print_text(f"\n{Fore.YELLOW}تم الإيقاف من قبل المستخدم{Style.RESET_ALL}")
             break
         except Exception as e:
-            print(f"{Fore.RED}خطأ: {e}{Style.RESET_ALL}")
+            print_text(f"{Fore.RED}خطأ: {e}{Style.RESET_ALL}")
 
 
 def tasks_mode():
@@ -267,21 +276,55 @@ def gmail_mode():
             print(f"{Fore.RED}خيار غير صحيح{Style.RESET_ALL}")
 
 
+def change_ai_provider():
+    """تغيير مزود الذكاء الاصطناعي"""
+    print_text(f"\n{Fore.MAGENTA}╔══════════════════════════════════════╗{Style.RESET_ALL}")
+    print_text(f"{Fore.MAGENTA}║    اختر مزود الذكاء الاصطناعي{Style.RESET_ALL}      {Fore.MAGENTA}║{Style.RESET_ALL}")
+    print_text(f"{Fore.MAGENTA}╚══════════════════════════════════════╝{Style.RESET_ALL}")
+    print_text(f"  {Fore.CYAN}1{Style.RESET_ALL}. Claude (Anthropic) - الأفضل للمحادثة والتفكير")
+    print_text(f"  {Fore.CYAN}2{Style.RESET_ALL}. Groq - سريع جداً")
+    print_text(f"  {Fore.CYAN}3{Style.RESET_ALL}. Ollama - محلي ومجاني")
+
+    choice = input(f"\n{Fore.CYAN}اختر خياراً (1-3):{Style.RESET_ALL} ").strip()
+
+    if choice == "1":
+        config.AI_PROVIDER = "claude"
+        print_text(f"{Fore.GREEN}✓ تم اختيار Claude{Style.RESET_ALL}")
+    elif choice == "2":
+        config.AI_PROVIDER = "groq"
+        print_text(f"{Fore.GREEN}✓ تم اختيار Groq{Style.RESET_ALL}")
+    elif choice == "3":
+        config.AI_PROVIDER = "ollama"
+        print_text(f"{Fore.GREEN}✓ تم اختيار Ollama{Style.RESET_ALL}")
+    else:
+        print_text(f"{Fore.RED}خيار غير صحيح{Style.RESET_ALL}")
+        return None
+
+    try:
+        return BaseAgent(provider=config.AI_PROVIDER)
+    except Exception as e:
+        print_text(f"{Fore.RED}خطأ في الاتصال: {e}{Style.RESET_ALL}")
+        print_text(f"{Fore.YELLOW}يرجى التحقق من إعداد API key في .env{Style.RESET_ALL}")
+        return None
+
+
 def show_settings():
     """عرض الإعدادات"""
-    print(f"\n{Fore.MAGENTA}╔══════════════════════════════════════╗{Style.RESET_ALL}")
-    print(f"{Fore.MAGENTA}║         الإعدادات الحالية{Style.RESET_ALL}         {Fore.MAGENTA}║{Style.RESET_ALL}")
-    print(f"{Fore.MAGENTA}╚══════════════════════════════════════╝{Style.RESET_ALL}")
-    print(f"  {Fore.CYAN}مزود الخدمة:{Style.RESET_ALL} {config.AI_PROVIDER}")
-    if config.AI_PROVIDER == "groq":
-        print(f"  {Fore.CYAN}النموذج:{Style.RESET_ALL} {config.GROQ_MODEL}")
+    print_text(f"\n{Fore.MAGENTA}╔══════════════════════════════════════╗{Style.RESET_ALL}")
+    print_text(f"{Fore.MAGENTA}║         الإعدادات الحالية{Style.RESET_ALL}         {Fore.MAGENTA}║{Style.RESET_ALL}")
+    print_text(f"{Fore.MAGENTA}╚══════════════════════════════════════╝{Style.RESET_ALL}")
+    print_text(f"  {Fore.CYAN}مزود الخدمة:{Style.RESET_ALL} {config.AI_PROVIDER}")
+    if config.AI_PROVIDER == "claude":
+        print_text(f"  {Fore.CYAN}النموذج:{Style.RESET_ALL} {config.CLAUDE_MODEL}")
+    elif config.AI_PROVIDER == "groq":
+        print_text(f"  {Fore.CYAN}النموذج:{Style.RESET_ALL} {config.GROQ_MODEL}")
     else:
-        print(f"  {Fore.CYAN}النموذج:{Style.RESET_ALL} {config.OLLAMA_MODEL}")
-        print(f"  {Fore.CYAN}العنوان:{Style.RESET_ALL} {config.OLLAMA_BASE_URL}")
-    print(f"  {Fore.CYAN}درجة الحرارة:{Style.RESET_ALL} {config.TEMPERATURE}")
-    print(f"  {Fore.CYAN}الحد الأقصى للرموز:{Style.RESET_ALL} {config.MAX_TOKENS}")
-    print(f"  {Fore.CYAN}Gmail Credentials:{Style.RESET_ALL} {config.GMAIL_CREDENTIALS_FILE}")
-    print(f"  {Fore.CYAN}Gmail Token:{Style.RESET_ALL} {config.GMAIL_TOKEN_FILE}")
+        print_text(f"  {Fore.CYAN}النموذج:{Style.RESET_ALL} {config.OLLAMA_MODEL}")
+        print_text(f"  {Fore.CYAN}العنوان:{Style.RESET_ALL} {config.OLLAMA_BASE_URL}")
+    print_text(f"  {Fore.CYAN}درجة الحرارة:{Style.RESET_ALL} {config.TEMPERATURE}")
+    print_text(f"  {Fore.CYAN}الحد الأقصى للرموز:{Style.RESET_ALL} {config.MAX_TOKENS}")
+    print_text(f"  {Fore.CYAN}Gmail Credentials:{Style.RESET_ALL} {config.GMAIL_CREDENTIALS_FILE}")
+    print_text(f"  {Fore.CYAN}Gmail Token:{Style.RESET_ALL} {config.GMAIL_TOKEN_FILE}")
 
 
 def main():
@@ -312,12 +355,16 @@ def main():
         elif choice == "3":
             gmail_mode()
         elif choice == "4":
-            show_settings()
+            new_agent = change_ai_provider()
+            if new_agent:
+                agent = new_agent
         elif choice == "5":
-            print(f"\n{Fore.GREEN}شكراً لاستخدامك الوكيل الذكي. وداعاً!{Style.RESET_ALL}\n")
+            show_settings()
+        elif choice == "6":
+            print_text(f"\n{Fore.GREEN}شكراً لاستخدامك الوكيل الذكي. وداعاً!{Style.RESET_ALL}\n")
             break
         else:
-            print(f"{Fore.RED}خيار غير صحيح{Style.RESET_ALL}")
+            print_text(f"{Fore.RED}خيار غير صحيح{Style.RESET_ALL}")
 
 
 if __name__ == "__main__":

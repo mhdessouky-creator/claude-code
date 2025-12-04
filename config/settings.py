@@ -10,6 +10,10 @@ load_dotenv()
 class Config:
     """إعدادات المشروع"""
 
+    # Anthropic Claude API Settings
+    ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+    CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-3-5-sonnet-20241022")
+
     # Groq API Settings
     GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
     GROQ_MODEL = os.getenv("GROQ_MODEL", "mixtral-8x7b-32768")
@@ -19,7 +23,7 @@ class Config:
     OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama2")
 
     # Agent Settings
-    AI_PROVIDER = os.getenv("AI_PROVIDER", "groq")  # "groq" أو "ollama"
+    AI_PROVIDER = os.getenv("AI_PROVIDER", "claude")  # "claude" أو "groq" أو "ollama"
     MAX_TOKENS = int(os.getenv("MAX_TOKENS", "2048"))
     TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
 

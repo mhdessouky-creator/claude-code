@@ -27,18 +27,30 @@ class BaseAgent:
         تهيئة الوكيل الأساسي
 
         Args:
-            provider: مزود الخدمة ("groq" أو "ollama")
+            provider: مزود الخدمة ("claude" أو "groq" أو "ollama")
         """
         self.provider = provider or config.AI_PROVIDER
         self.conversation_history: List[Message] = []
         self.model = None
 
-        if self.provider == "groq":
+        if self.provider == "claude":
+            self._init_claude()
+        elif self.provider == "groq":
             self._init_groq()
         elif self.provider == "ollama":
             self._init_ollama()
         else:
             raise ValueError(f"مزود غير معروف: {self.provider}")
+
+    def _init_claude(self):
+        """تهيئة Anthropic Claude API"""
+        try:
+            from anthropic import Anthropic
+            self.model = Anthropic(api_key=config.ANTHROPIC_API_KEY)
+            print(f"{Fore.GREEN}✓ تم الاتصال بـ Claude بنجاح{Style.RESET_ALL}")
+        except Exception as e:
+            print(f"{Fore.RED}✗ خطأ في الاتصال بـ Claude: {e}{Style.RESET_ALL}")
+            raise
 
     def _init_groq(self):
         """تهيئة Groq API"""
@@ -109,6 +121,27 @@ class BaseAgent:
             print(f"{Fore.RED}{error_msg}{Style.RESET_ALL}")
             return error_msg
 
+    def process_with_claude(self, prompt: str) -> str:
+        """معالجة الطلب باستخدام Claude"""
+        try:
+            self.add_to_history("user", prompt)
+
+            response = self.model.messages.create(
+                model=config.CLAUDE_MODEL,
+                max_tokens=config.MAX_TOKENS,
+                temperature=config.TEMPERATURE,
+                messages=self.get_history_for_api(),
+            )
+
+            assistant_message = response.content[0].text
+            self.add_to_history("assistant", assistant_message)
+            return assistant_message
+
+        except Exception as e:
+            error_msg = f"خطأ في معالجة الطلب: {str(e)}"
+            print(f"{Fore.RED}{error_msg}{Style.RESET_ALL}")
+            return error_msg
+
     def process(self, prompt: str) -> str:
         """
         معالجة الطلب الأساسي
@@ -119,7 +152,9 @@ class BaseAgent:
         Returns:
             الرد من النموذج
         """
-        if self.provider == "groq":
+        if self.provider == "claude":
+            return self.process_with_claude(prompt)
+        elif self.provider == "groq":
             return self.process_with_groq(prompt)
         else:
             return self.process_with_ollama(prompt)

@@ -6,6 +6,13 @@ ollama>=0.0.1
 colorama>=0.4.6
 typing-extensions>=4.5.0
 
+# Anthropic Claude API
+anthropic>=0.18.0
+
+# Arabic Text Support for Termux
+arabic-reshaper>=3.0.0
+python-bidi>=0.4.2
+
 # Google APIs for Gmail Integration
 google-auth>=2.25.0
 google-auth-oauthlib>=1.2.0
