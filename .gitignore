@@ -73,3 +73,14 @@ credentials.json
 token.pickle
 token.json
 client_secret*.json
+
+# Additional files
+.replit
+replit.nix
+.env.agent
+
+# Python specific
+*.py[cod]
+*$py.class
+.pytest_cache/
+.Python
