@@ -1,0 +1,79 @@
+===========================================
+  TERMUX - QUICK START GUIDE
+===========================================
+
+STEP 1: Install requirements (first time only)
+----------------------------------------------
+pkg update
+pkg install nodejs git
+npm install
+
+
+STEP 2: Setup API Key (first time only)
+----------------------------------------------
+nano .env
+
+Add this line:
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+
+Save: Ctrl+X then Y then Enter
+
+
+STEP 3: Run the agent
+----------------------------------------------
+./run.sh
+
+Or use directly:
+node src/cli.js chat
+
+
+===========================================
+  Commands Cheatsheet
+===========================================
+
+./run.sh              - Interactive menu
+node src/cli.js chat  - Chat mode
+node src/cli.js task "your task here"
+node src/cli.js status
+
+
+===========================================
+  Common Issues
+===========================================
+
+Problem: Permission denied
+Solution: chmod +x run.sh
+
+Problem: node not found
+Solution: pkg install nodejs
+
+Problem: API key error
+Solution: nano .env (add your key)
+
+
+===========================================
+  Support
+===========================================
+
+GitHub: github.com/mhdessouky-creator/claude-code
+
+
+===========================================
+  Arabic Instructions
+===========================================
+
+1. ثبت المتطلبات:
+   pkg install nodejs git
+   npm install
+
+2. اضف API Key:
+   nano .env
+   اضف: ANTHROPIC_API_KEY=sk-ant-your-key
+
+3. شغل البرنامج:
+   ./run.sh
+
+او:
+   node src/cli.js chat
+
+===========================================
